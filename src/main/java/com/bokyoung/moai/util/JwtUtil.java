@@ -1,9 +1,7 @@
 package com.bokyoung.moai.util;
 
 import static io.jsonwebtoken.Jwts.*;
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
-import com.bokyoung.moai.constant.MoaiStaffRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -51,31 +49,29 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    // AccessToken 생성
-    public String createAccessToken(String userId, String role) {
-
-        return BEARER_PREFIX +
-            builder()
-                    .claim("userId", userId)
-                    .claim("role", role)
-                    .issuedAt(new Date(System.currentTimeMillis()))
-                    .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_TIME))
-                    .signWith(key)
-                    .compact();
-    }
-
-    // RefreshToken 생성
-    public String createRefreshToken(String userId) {
-
-        return builder()
+    // Token 생성
+    private String createToken(String category, String userId, String role, long expirationTime) {
+        return Jwts.builder()
+                .claim("category", category)
                 .claim("userId", userId)
+                .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
 
-    // RefreshToken Cookie에 저장
+    // AccessToken 생성
+    public String createAccessToken(String category, String userId, String role) {
+        return BEARER_PREFIX + createToken(category, userId, role, ACCESS_TOKEN_TIME);
+    }
+
+    // RefreshToken 생성
+    public String createRefreshToken(String category, String userId, String role) {
+        return createToken(category, userId, role, REFRESH_TOKEN_TIME);
+    }
+
+    // RefreshToken Cookie 생성
     public Cookie createCookie(String key, String value) {
             Cookie cookie = new Cookie(key, value); // Name-Value
             cookie.setMaxAge(30 * 24 * 60 * 60);
@@ -95,7 +91,7 @@ public class JwtUtil {
         return null;
     }
 
-    //JWT 토큰 substring
+    // JWT 토큰 substring
     public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
             return tokenValue.substring(7);
@@ -104,7 +100,7 @@ public class JwtUtil {
         throw new NullPointerException("Not Found Token");
     }
 
-    // 토큰 검증
+    // JWT 토큰 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
@@ -124,5 +120,23 @@ public class JwtUtil {
     // 토큰에서 사용자 정보 가져오기
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
+    }
+
+    public boolean isExpired(String refresh) {
+        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().getExpiration().before(new Date());
+
+    }
+
+    public String getCategory(String refresh) {
+        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("category", String.class);
+    }
+
+    public String getUserId(String refresh) {
+        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("userId", String.class);
+
+    }
+
+    public String getRole(String refresh) {
+        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("role", String.class);
     }
 }

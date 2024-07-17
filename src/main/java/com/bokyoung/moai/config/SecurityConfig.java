@@ -4,6 +4,7 @@ import com.bokyoung.moai.filter.JwtAuthorizationFilter;
 import com.bokyoung.moai.service.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,11 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,6 +51,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorize) -> authorize
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
             .requestMatchers("/moai/staff/join", "/moai/staff/login").permitAll() //회원가입, 로그인 접근 허용
+            .requestMatchers("/moai/staff/reissue").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
