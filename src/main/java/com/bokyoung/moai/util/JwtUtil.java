@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -30,8 +32,10 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-    //Header의 key값 (accessToken)
-    public static final String AUTHORIZATION_HEADER = "Authorization";
+    //accessToken category
+    public static final String ACCESS_TOKEN_HEADER = "access";
+    //refreshToken category
+    public static final String REFRESH_TOKEN_HEADER = "refresh";
     // 사용자 권한 값의 KEY
     public static final String AUTHORIZATION_KEY = "auth";
     // Token 식별자
@@ -41,62 +45,57 @@ public class JwtUtil {
     // REFRESH_TOKEN 만료시간
     private final Long REFRESH_TOKEN_TIME = 30 * 24 * 60 * 60 * 1000L; // 한달
 
-    @Value("${jwt.secret-key}")
-    private String secretKey;
-    private Key key;
+    private SecretKey secretKey;
 
     // secret키 HS256 암호화 알고리즘으로 암호화
-    @PostConstruct
-    public void init() {
-        byte[] bytes = Base64.getDecoder().decode(secretKey);
-        key = Keys.hmacShaKeyFor(bytes);
+    public JwtUtil(@Value("${jwt.secret-key}") String secret) {
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    }
+
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
     }
 
     // AccessToken 생성
-    public String createAccessToken(String userId, MoaiStaffRole role) {
-        Date date = new Date();
+    public String createAccessToken(String category, String userId, String role) {
 
         return BEARER_PREFIX +
             builder()
-                .setSubject(userId)
-                .claim(AUTHORIZATION_KEY, role)
-                .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
-                .setIssuedAt(date)
-                .signWith(HS256, key)
-                .compact();
+                    .claim("category", category)
+                    .claim("userId", userId)
+                    .claim("role", role)
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_TIME))
+                    .signWith(secretKey)
+                    .compact();
     }
 
     // RefreshToken 생성
-    public String createRefreshToken(String userId) {
-        Date date = new Date();
+    public String createRefreshToken(String category, String userId) {
 
         return builder()
-                .setSubject(userId)
-                .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
-                .setIssuedAt(date)
-                .signWith(HS256, key)
+                .claim("category", category)
+                .claim("userId", userId)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME))
+                .signWith(secretKey)
                 .compact();
     }
 
     // RefreshToken Cookie에 저장
-    public void addJwtToCookie(String token, HttpServletResponse res) {
-        try {
-            token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
-
-            Cookie cookie = new Cookie("refreshToken", token); // Name-Value
+    public Cookie createCookie(String key, String value) {
+            Cookie cookie = new Cookie(key, value); // Name-Value
+            cookie.setMaxAge(30 * 24 * 60 * 60);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
 
-            res.addCookie(cookie);
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage());
-        }
+            return cookie;
     }
 
     // header에서 JWT 가져오기
     public String getJwtFromHeader(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        String bearerToken = request.getHeader(ACCESS_TOKEN_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }
@@ -115,7 +114,7 @@ public class JwtUtil {
     // 토큰 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
+            Jwts.parser().verifyWith((SecretKey) secretKey).build().parseSignedClaims(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않은 JWT 토큰 서명입니다.", e);
@@ -131,6 +130,6 @@ public class JwtUtil {
 
     // 토큰에서 사용자 정보 가져오기
     public Claims getUserInfoFromToken(String token) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
 }

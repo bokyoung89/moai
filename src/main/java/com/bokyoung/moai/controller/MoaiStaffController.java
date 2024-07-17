@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +34,9 @@ public class MoaiStaffController {
 
         MoaiStaffLoginResponseDto responseDto = moaiStaffService.login(request, response);
         //AccessToken Header에 담아서 반환
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, responseDto.getAccessToken());
-        //RefrechToken Cookie에 담아서 반환
-        jwtUtil.addJwtToCookie(responseDto.getRefreshToken(), response);
+        response.addHeader(JwtUtil.ACCESS_TOKEN_HEADER, responseDto.getAccessToken());
+        //RefreshToken Cookie에 담아서 반환
+        response.addCookie(jwtUtil.createCookie(JwtUtil.REFRESH_TOKEN_HEADER, responseDto.getRefreshToken()));
     }
 }
 

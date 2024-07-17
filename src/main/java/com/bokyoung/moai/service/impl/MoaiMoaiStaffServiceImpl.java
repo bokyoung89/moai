@@ -39,8 +39,8 @@ public class MoaiMoaiStaffServiceImpl implements MoaiStaffService {
         }
 
         // 로그인 성공 시 accessToken, refreshToken 생성
-        String accessToken = jwtUtil.createAccessToken(moaiStaff.getUserId(), MoaiStaffRole.CXO);
-        String refreshToken = jwtUtil.createRefreshToken(moaiStaff.getUserId());
+        String accessToken = jwtUtil.createAccessToken(JwtUtil.ACCESS_TOKEN_HEADER, moaiStaff.getUserId(), moaiStaff.getRole());
+        String refreshToken = jwtUtil.createRefreshToken(JwtUtil.REFRESH_TOKEN_HEADER, moaiStaff.getUserId());
 
         return MoaiStaffLoginResponseDto.builder()
                 .accessToken(accessToken)
