@@ -38,11 +38,13 @@ public class MoaiMoaiStaffServiceImpl implements MoaiStaffService {
             throw new MydArgumentException(ErrorCode.ERR_INVALID_PARAMETER, "비밀번호가 일치하지 않습니다.");
         }
 
-        // 로그인 성공 시 accessToken 생성
+        // 로그인 성공 시 accessToken, refreshToken 생성
         String accessToken = jwtUtil.createAccessToken(moaiStaff.getUserId(), MoaiStaffRole.CXO);
+        String refreshToken = jwtUtil.createRefreshToken(moaiStaff.getUserId());
 
         return MoaiStaffLoginResponseDto.builder()
-            .accessToken(accessToken)
-            .build();
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 }

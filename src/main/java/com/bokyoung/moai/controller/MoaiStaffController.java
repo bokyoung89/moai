@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모아이", description = "Moai Staff API")
 public class MoaiStaffController {
     private final MoaiStaffService moaiStaffService;
+    private final JwtUtil jwtUtil;
 
     @Operation(summary = "Moai 로그인 인증",
             description = "마이디 운영 관리 지표 앱에 로그인한다.",
@@ -33,6 +34,8 @@ public class MoaiStaffController {
         MoaiStaffLoginResponseDto responseDto = moaiStaffService.login(request, response);
         //AccessToken Header에 담아서 반환
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, responseDto.getAccessToken());
+        //RefrechToken Cookie에 담아서 반환
+        jwtUtil.addJwtToCookie(responseDto.getRefreshToken(), response);
     }
 }
 

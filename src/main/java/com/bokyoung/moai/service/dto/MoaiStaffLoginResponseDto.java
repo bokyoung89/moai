@@ -16,4 +16,7 @@ public class MoaiStaffLoginResponseDto {
 
     @Schema(description = "accessToken")
     String accessToken;
+
+    @Schema(description = "refreshToken")
+    String refreshToken;
 }
