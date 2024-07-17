@@ -35,11 +35,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             tokenValue = jwtUtil.substringToken(tokenValue);
             log.info(tokenValue);
 
+            //JWT 토큰 검증
             if (!jwtUtil.validateToken(tokenValue)) {
                 log.error("Token error");
                 return;
             }
 
+            //사용자 정보 가져오기
             Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
 
             try {
