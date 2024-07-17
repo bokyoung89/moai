@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: moai
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+jwt:
+  secret-key : c3ByaW5nLW1hc3Rlci1tZW1vLXNlcnZpY2UtMjAyNC5zZWNyZXQta2V5
