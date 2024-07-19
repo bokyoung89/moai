@@ -126,9 +126,11 @@ public class MoaiStaffServiceImpl implements MoaiStaffService {
 
         //make new JWT
         String newAccessToken = jwtUtil.createAccessToken(JwtUtil.ACCESS_TOKEN_HEADER, userId, role);
+        String newRefreshToken = jwtUtil.createRefreshToken(JwtUtil.REFRESH_TOKEN_HEADER, userId, role);
 
         return MoaiStaffReissueResponseDto.builder()
                 .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 }

@@ -74,13 +74,9 @@ public class MoaiStaffController {
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
         MoaiStaffReissueResponseDto responseDto = moaiStaffService.reissueToken(request, response);
-        //새로운 AccessToken Header에 담아서 반환
+        //새로운 accessToken, refreshToken Header에 담아서 반환
         response.setHeader(JwtUtil.ACCESS_TOKEN_HEADER, responseDto.getAccessToken());
-    }
-
-    @GetMapping("/moai/staff/info")
-    public String apiRequestTest() {
-        return "success";
+        response.addCookie(jwtUtil.createCookie(JwtUtil.REFRESH_TOKEN_HEADER, responseDto.getRefreshToken()));
     }
 }
 
