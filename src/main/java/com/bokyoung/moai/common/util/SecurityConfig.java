@@ -1,6 +1,7 @@
 package com.bokyoung.moai.common.util;
 
 import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
+import com.bokyoung.moai.filter.CustomLogoutFilter;
 import com.bokyoung.moai.filter.JwtAuthorizationFilter;
 import com.bokyoung.moai.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -33,6 +35,11 @@ public class SecurityConfig {
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
         return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+    }
+
+    @Bean
+    public CustomLogoutFilter customLogoutFilter() {
+        return new CustomLogoutFilter(jwtUtil);
     }
 
     @Bean
@@ -56,6 +63,7 @@ public class SecurityConfig {
 
         // 필터 관리
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(customLogoutFilter(), LogoutFilter.class);
 
         return http.build();
     };
