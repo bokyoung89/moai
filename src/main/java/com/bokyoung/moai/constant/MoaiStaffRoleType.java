@@ -3,12 +3,12 @@ package com.bokyoung.moai.constant;
 import lombok.Getter;
 
 @Getter
-public enum MoaiStaffRole {
+public enum MoaiStaffRoleType {
     CXO(Authority.CXO);
 
     private final String authority;
 
-    MoaiStaffRole(String authority) {
+    MoaiStaffRoleType(String authority) {
         this.authority = authority;
     }
 

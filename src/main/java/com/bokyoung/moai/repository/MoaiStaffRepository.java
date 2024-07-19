@@ -11,4 +11,5 @@ public interface MoaiStaffRepository extends JpaRepository<MoaiStaff, Long> {
 
     Optional<MoaiStaff> findByUserId(String userId);
 
+    boolean existsByUserId(String userId);
 }

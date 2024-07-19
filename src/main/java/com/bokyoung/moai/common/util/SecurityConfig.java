@@ -1,13 +1,13 @@
-package com.bokyoung.moai.config;
+package com.bokyoung.moai.common.util;
 
+import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.filter.JwtAuthorizationFilter;
-import com.bokyoung.moai.service.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,15 +19,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,15 +41,15 @@ public class SecurityConfig {
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement((sessionManagement) -> sessionManagement
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
         http.authorizeHttpRequests((authorize) -> authorize
-            .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-            .requestMatchers("/moai/staff/join", "/moai/staff/login").permitAll() //회원가입, 로그인 접근 허용
-            .requestMatchers("/moai/staff/reissue").permitAll()
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .anyRequest().authenticated() // 그 외 모든 요청 인증처리
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/moai/staff/join", "/moai/staff/login").permitAll() //회원가입, 로그인 접근 허용
+                .requestMatchers("/moai/staff/reissue").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
 
         http.formLogin((formLogin) -> formLogin.disable());

@@ -1,4 +1,4 @@
-package com.bokyoung.moai.config;
+package com.bokyoung.moai.common.util;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -12,18 +12,21 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
+
+@Profile("!test")
 @OpenAPIDefinition(
-    security = {
-        @SecurityRequirement(name = "X-Auth-Token"),
-    }
+        security = {
+                @SecurityRequirement(name = "X-Auth-Token"),
+        }
 )
 @SecuritySchemes({
-    @SecurityScheme(name = "X-Auth-Token",
-        type = SecuritySchemeType.APIKEY,
-        description = "Api token",
-        in = SecuritySchemeIn.HEADER,
-        paramName = "X-Auth-Token"),
+        @SecurityScheme(name = "X-Auth-Token",
+                type = SecuritySchemeType.APIKEY,
+                description = "Api token",
+                in = SecuritySchemeIn.HEADER,
+                paramName = "X-Auth-Token"),
 })
 @Configuration
 public class SwaggerConfig {

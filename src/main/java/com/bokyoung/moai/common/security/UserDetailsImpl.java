@@ -1,6 +1,6 @@
-package com.bokyoung.moai.service.security;
+package com.bokyoung.moai.common.security;
 
-import com.bokyoung.moai.constant.MoaiStaffRole;
+import com.bokyoung.moai.constant.MoaiStaffRoleType;
 import com.bokyoung.moai.domain.MoaiStaff;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,7 +33,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        MoaiStaffRole role = MoaiStaffRole.valueOf(moaiStaff.getRole());
+        MoaiStaffRoleType role = MoaiStaffRoleType.valueOf(moaiStaff.getRole().getAuthority());
         String authority = role.getAuthority();
 
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);

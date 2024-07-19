@@ -1,6 +1,6 @@
 package com.bokyoung.moai.util;
 
-import static io.jsonwebtoken.Jwts.*;
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -8,7 +8,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -25,9 +23,10 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-    //accessToken category
+
+    //accessToken key값
     public static final String ACCESS_TOKEN_HEADER = "access";
-    //refreshToken category
+    //refreshToken key값
     public static final String REFRESH_TOKEN_HEADER = "refresh";
     // 사용자 권한 값의 KEY
     public static final String AUTHORIZATION_KEY = "auth";
@@ -55,9 +54,9 @@ public class JwtUtil {
                 .claim("category", category)
                 .claim("userId", userId)
                 .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(key)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(HS256, key)
                 .compact();
     }
 
@@ -73,16 +72,15 @@ public class JwtUtil {
 
     // RefreshToken Cookie 생성
     public Cookie createCookie(String key, String value) {
-            Cookie cookie = new Cookie(key, value); // Name-Value
-            cookie.setMaxAge(30 * 24 * 60 * 60);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-
-            return cookie;
+        Cookie cookie = new Cookie(key, value); // Name-Value
+        cookie.setMaxAge(30 * 24 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        return cookie;
     }
 
-    // header에서 JWT 가져오기
+    // header에서 토큰 가져오기
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(ACCESS_TOKEN_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
@@ -91,19 +89,10 @@ public class JwtUtil {
         return null;
     }
 
-    // JWT 토큰 substring
-    public String substringToken(String tokenValue) {
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
-        }
-        log.error("Not Found Token");
-        throw new NullPointerException("Not Found Token");
-    }
-
-    // JWT 토큰 검증
+    // 토큰 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않은 JWT 토큰 서명입니다.", e);
@@ -119,24 +108,23 @@ public class JwtUtil {
 
     // 토큰에서 사용자 정보 가져오기
     public Claims getUserInfoFromToken(String token) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
+    // 만료 여부 확인하기
     public boolean isExpired(String refresh) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().getExpiration().before(new Date());
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().getExpiration().before(new Date());
 
     }
 
-    public String getCategory(String refresh) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("category", String.class);
-    }
-
+    // user_id 가져오기
     public String getUserId(String refresh) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("userId", String.class);
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().get("userId", String.class);
 
     }
 
+    // role 가져오기
     public String getRole(String refresh) {
-        return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(refresh).getPayload().get("role", String.class);
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().get("role", String.class);
     }
 }

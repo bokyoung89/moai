@@ -1,5 +1,6 @@
 package com.bokyoung.moai.domain;
 
+import com.bokyoung.moai.constant.MoaiStaffRoleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +35,7 @@ public class MoaiStaff {
 
         @Schema(description = "사용자 권한", example = "CXO")
         @Column(name = "role", length = 30)
-        private String role;
+        @Enumerated(EnumType.STRING)
+        private MoaiStaffRoleType role;
 
 }

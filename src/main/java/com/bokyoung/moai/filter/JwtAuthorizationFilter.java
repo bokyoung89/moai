@@ -1,6 +1,6 @@
 package com.bokyoung.moai.filter;
 
-import com.bokyoung.moai.service.security.UserDetailsServiceImpl;
+import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
@@ -31,17 +31,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String tokenValue = jwtUtil.getJwtFromHeader(req);
 
         if(StringUtils.hasText(tokenValue)) {
-            //JWT 토큰 substring
-            tokenValue = jwtUtil.substringToken(tokenValue);
             log.info(tokenValue);
 
-            //JWT 토큰 검증
             if (!jwtUtil.validateToken(tokenValue)) {
                 log.error("Token error");
                 return;
             }
 
-            //사용자 정보 가져오기
             Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
 
             try {
