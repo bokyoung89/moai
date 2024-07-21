@@ -78,5 +78,10 @@ public class MoaiStaffController {
         response.setHeader(JwtUtil.ACCESS_TOKEN_HEADER, responseDto.getAccessToken());
         response.addCookie(jwtUtil.createCookie(JwtUtil.REFRESH_TOKEN_HEADER, responseDto.getRefreshToken()));
     }
+
+    @GetMapping("/moai/staff/info")
+    public String apiRequestTest() {
+        return "success";
+    }
 }
 

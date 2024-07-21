@@ -1,9 +1,13 @@
 package com.bokyoung.moai.filter;
 
 import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
+import com.bokyoung.moai.exception.MydArgumentException;
+import com.bokyoung.moai.exception.domain.ErrorCode;
 import com.bokyoung.moai.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
+
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,12 +34,24 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String tokenValue = jwtUtil.getJwtFromHeader(req);
 
+        //토큰이 없다면 다음 필터로 넘김
         if(StringUtils.hasText(tokenValue)) {
             log.info(tokenValue);
 
-            if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("Token error");
-                return;
+            //토큰 만료 여부 확인. 만료 시 다음 필터로 넘기지 않음
+            try {
+                jwtUtil.isExpired(tokenValue);
+            } catch (ExpiredJwtException e) {
+                log.error("Expired access token", e);
+                throw new MydArgumentException(ErrorCode.ERR_EXPIRED_TOKEN);
+            }
+
+            // 토큰이 access인지 확인 (발급시 페이로드에 명시)
+            String category = jwtUtil.getCategory(tokenValue);
+
+            if(!category.equals("access")) {
+                log.error("invalid access token");
+                throw new MydArgumentException(ErrorCode.ERR_INVALID_TOKEN);
             }
 
             Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
@@ -50,6 +66,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(req, res);
 
+        return;
     }
 
     //인증 처리

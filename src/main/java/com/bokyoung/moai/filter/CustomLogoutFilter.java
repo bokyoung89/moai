@@ -1,5 +1,7 @@
 package com.bokyoung.moai.filter;
 
+import com.bokyoung.moai.exception.MydArgumentException;
+import com.bokyoung.moai.exception.domain.ErrorCode;
 import com.bokyoung.moai.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -56,17 +58,14 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         //refresh token null 체크
         if(refresh == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new MydArgumentException(ErrorCode.ERR_NOT_FOUND_OBJECT, "refresh token is null");
         }
 
         //refresh token 만료 체크
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-            //status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new MydArgumentException(ErrorCode.ERR_EXPIRED_TOKEN, "Expired refresh token");
         }
 
         //refresh token cookie값 유효시간 0으로 만료

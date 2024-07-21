@@ -112,19 +112,23 @@ public class JwtUtil {
     }
 
     // 만료 여부 확인하기
-    public boolean isExpired(String refresh) {
-        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().getExpiration().before(new Date());
+    public boolean isExpired(String token) {
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date());
 
     }
 
     // user_id 가져오기
-    public String getUserId(String refresh) {
-        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().get("userId", String.class);
+    public String getUserId(String token) {
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody().get("userId", String.class);
 
     }
 
     // role 가져오기
-    public String getRole(String refresh) {
-        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(refresh).getBody().get("role", String.class);
+    public String getRole(String token) {
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody().get("role", String.class);
+    }
+
+    public String getCategory(String token) {
+        return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody().get("category", String.class);
     }
 }
