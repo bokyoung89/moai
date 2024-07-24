@@ -1,9 +1,11 @@
 package com.bokyoung.moai.userverification.controller;
 
 import com.bokyoung.moai.userverification.controller.response.MoaiUserVerificationResponse;
+import com.bokyoung.moai.userverification.controller.response.MoaiUserVerificationRouteResponse;
 import com.bokyoung.moai.userverification.service.MoaiUserVerificationService;
 import com.bokyoung.moai.userverification.service.dto.MoaiUserVerificationRequestDto;
 import com.bokyoung.moai.userverification.service.dto.MoaiUserVerificationResponseDto;
+import com.bokyoung.moai.userverification.service.dto.MoaiUserVerificationRouteResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +31,7 @@ public class MoaiUserVerificationController {
     private final ModelMapper mapper;
     private final MoaiUserVerificationService moaiUserVerificationService;
 
-    @GetMapping("/moai/verification/count")
+    @GetMapping("/moai/verification/count-by-period")
     @Operation(summary = "기간별 본인인증 사용자 수 조회",
         description = "본인인증한 사용자의 수를 기간별(최근 4주, 이번달)로 조회한다.",
         security = @SecurityRequirement(name = "X-Auth-Token")
@@ -46,4 +48,21 @@ public class MoaiUserVerificationController {
 
         return mapper.map(verificationResponseDto, new TypeToken<List<MoaiUserVerificationResponse>>(){}.getType());
     }
+
+    @GetMapping("/moai/verification/count-by-route")
+    @Operation(summary = "채널별 본인인증 사용자 수 조회",
+            description = "본인인증한 사용자의 수를 채널별(최근 4주, 이번달)로 조회한다.",
+            security = @SecurityRequirement(name = "X-Auth-Token")
+    )
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = MoaiUserVerificationResponse.class)))
+    public List<MoaiUserVerificationRouteResponse> getUserVerificationCountByRoute (
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        MoaiUserVerificationRequestDto requestDto = MoaiUserVerificationRequestDto.builder()
+                .startDate(startDate).endDate(endDate).build();
+
+        return mapper.map(moaiUserVerificationService.getUserVerificationCountByRoute(requestDto), new TypeToken<List<MoaiUserVerificationRouteResponse>>(){}.getType());
+    }
+
 }

@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Comment;
-
 @Setter
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -16,6 +15,7 @@ import org.hibernate.annotations.Comment;
 @Table(name = "", uniqueConstraints = {
     @UniqueConstraint(name = "USER_INFLUX_LOG_UDX_01", columnNames = {"did", "route"})
 })
+
 public class MoaiUserInfluxLog extends BaseEntity {
 
     @Id

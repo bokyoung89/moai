@@ -2,6 +2,7 @@ package com.bokyoung.moai.userverification.repository;
 
 import com.bokyoung.moai.userverification.domain.MoaiUserVerification;
 import com.bokyoung.moai.userverification.repository.projection.MoaiUserVerificationProjection;
+import com.bokyoung.moai.userverification.repository.projection.MoaiUserVerificationRouteProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,14 @@ public interface MoaiUserVerificationRepository extends JpaRepository<MoaiUserVe
         + "WHERE DATE(uv.created_at) BETWEEN (:startDate) AND (:endDate) "
         + "GROUP BY DATE_FORMAT(uv.created_at, '%Y-%m-%d')")
     List<MoaiUserVerificationProjection> findUserVerificationCountByDateInGroupByCreatedAt(@Param("startDate") LocalDate startDate,
-                                                                    @Param("endDate") LocalDate endDate);
+                                                                                           @Param("endDate") LocalDate endDate);
+
+    @Query(nativeQuery = true, value = "SELECT uil.route AS route, DATE_FORMAT(uv.created_at, '%Y-%m-%d') AS day, COUNT(uv.did) AS count "
+            + "FROM user_verification uv "
+            + "INNER JOIN user_influx_log uil ON uv.did = uil.did "
+            + "WHERE DATE(uv.created_at) BETWEEN (:startDate) AND (:endDate) "
+            + "GROUP BY uil.route, DATE_FORMAT(uv.created_at, '%Y-%m-%d')")
+    List<MoaiUserVerificationRouteProjection> findUserVerificationCountByRouteInGroupByCreatedAtAndRoute(@Param("startDate") LocalDate startDate,
+                                                                                                         @Param("endDate") LocalDate endDate);
 
 }
