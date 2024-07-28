@@ -31,7 +31,7 @@ public class MoaiUserVerificationController {
     private final ModelMapper mapper;
     private final MoaiUserVerificationService moaiUserVerificationService;
 
-    @GetMapping("/moai/verification/count-by-period")
+    @GetMapping("/moai/verification/count-all")
     @Operation(summary = "기간별 본인인증 사용자 수 조회",
         description = "본인인증한 사용자의 수를 기간별(최근 4주, 이번달)로 조회한다.",
         security = @SecurityRequirement(name = "X-Auth-Token")
