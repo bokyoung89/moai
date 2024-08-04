@@ -1,7 +1,7 @@
 package com.bokyoung.moai.common.security;
 
-import com.bokyoung.moai.constant.MoaiStaffRoleType;
-import com.bokyoung.moai.domain.MoaiStaff;
+import com.bokyoung.moai.staff.constant.MoaiStaffRoleType;
+import com.bokyoung.moai.staff.domain.MoaiStaff;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

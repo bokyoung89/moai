@@ -1,8 +1,10 @@
 package com.bokyoung.moai.reward.controller;
 
 import com.bokyoung.moai.aspect.Auth;
+import com.bokyoung.moai.reward.controller.response.ChallengeRewardRateResponse;
 import com.bokyoung.moai.reward.controller.response.ChallengeRewardResponse;
 import com.bokyoung.moai.reward.service.ChallengeRewardService;
+import com.bokyoung.moai.reward.service.dto.ChallengeRewardRateResponseDto;
 import com.bokyoung.moai.reward.service.dto.ChallengeRewardRequestDto;
 import com.bokyoung.moai.reward.service.dto.ChallengeRewardResponseDto;
 import com.bokyoung.moai.staff.constant.MoaiStaffRoleType;
@@ -36,20 +38,20 @@ public class ChallengeRewardController {
 
     private final ChallengeRewardService challengeRewardService;
 
-    @GetMapping("/moai/challenge/challenges/rewards")
+    @GetMapping("/moai/reward")
     @Operation(summary = "그룹루틴 챌린지 지급 총액",
             description = "챌린지 참여 성공 후 지급 받은 금액의 총액을 조회한다",
             security = @SecurityRequirement(name = "Authorization")
     )
-    @Auth(type = MoaiStaffRoleType.CXO)
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = MoaiUserVerificationResponse.class)))
-    public List<ChallengeRewardResponse> getChallengeRewardAmountAll(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+    public List<ChallengeRewardResponse> getChallengeRewardWithPeriod(@RequestParam(name = "category", required = false) String category, @RequestParam(value = "type", required = false) String type,
+                                                                      @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                                                      @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
         ChallengeRewardRequestDto requestDto = ChallengeRewardRequestDto.builder()
-                .startDate(startDate).endDate(endDate).build();
+                .startDate(startDate).endDate(endDate).category(category).type(type).build();
 
-        List<ChallengeRewardResponseDto> challengeRewardResponseDto = challengeRewardService.getChallengeRewardAmountAll(requestDto);
+        List<ChallengeRewardResponseDto> challengeRewardResponseDto = challengeRewardService.getChallengeRewardWithPeriod(requestDto, category, type);
 
         return mapper.map(challengeRewardResponseDto, new TypeToken<List<ChallengeRewardResponse>>(){}.getType());
     }

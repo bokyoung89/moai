@@ -1,7 +1,7 @@
 package com.bokyoung.moai.common.security;
 
-import com.bokyoung.moai.domain.MoaiStaff;
-import com.bokyoung.moai.repository.MoaiStaffRepository;
+import com.bokyoung.moai.staff.domain.MoaiStaff;
+import com.bokyoung.moai.staff.repository.MoaiStaffRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

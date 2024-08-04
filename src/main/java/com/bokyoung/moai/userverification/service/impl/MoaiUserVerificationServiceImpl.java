@@ -28,17 +28,31 @@ public class MoaiUserVerificationServiceImpl implements MoaiUserVerificationServ
     private final MoaiUserVerificationRepository moaiUserVerificationRepository;
 
     @Override
-    public List<MoaiUserVerificationResponseDto> getUserVerificationCountByPeriod(MoaiUserVerificationRequestDto requestDto) {
+    public List<MoaiUserVerificationResponseDto> getUserVerificationCountByAll(MoaiUserVerificationRequestDto requestDto) {
 
         List<MoaiUserVerificationProjection> verificationList =
                 moaiUserVerificationRepository.findUserVerificationCountByDateInGroupByCreatedAt(
                         requestDto.getStartDate(), requestDto.getEndDate());
 
+        Map<String, MoaiUserVerificationResponseDto> responseMap = new HashMap<>();
 
+        //날짜값 초기 셋팅
+        initialDateSettingsForAllCount(requestDto.getStartDate(), requestDto.getEndDate(), responseMap);
 
+        for (MoaiUserVerificationProjection projection : verificationList) {
+            LocalDate date = projection.getDate();
+            Long count = projection.getCount();
 
-        return mapper.map(verificationList, new TypeToken<List<MoaiUserVerificationResponseDto>>() {
-        }.getType());
+            MoaiUserVerificationResponseDto responseDto = responseMap.get(date.toString());
+            responseDto.setCount(count);
+        }
+
+        // 데이터 없는 날짜에 카운트 값 0으로 셋팅
+        initialCountSettingsForAllCount(responseMap);
+
+        return responseMap.values().stream()
+                .sorted(Comparator.comparing(MoaiUserVerificationResponseDto::getDate))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -49,20 +63,55 @@ public class MoaiUserVerificationServiceImpl implements MoaiUserVerificationServ
                         requestDto.getStartDate(), requestDto.getEndDate());
 
         Map<String, MoaiUserVerificationRouteResponseDto> responseMap = new HashMap<>();
+        Set<String> allRoutes = new HashSet<>();
+
+        //날짜값 초기 셋팅
+        initialDateSettingsForRouteCount(requestDto.getStartDate(), requestDto.getEndDate(), responseMap);
 
         for (MoaiUserVerificationRouteProjection projection : verificationRouteList) {
-            LocalDate day = projection.getDay();
+            LocalDate date = projection.getDate();
             String route = projection.getRoute();
             Long count = projection.getCount();
 
-            MoaiUserVerificationRouteResponseDto responseDto =
-                    responseMap.computeIfAbsent(String.valueOf(day), k -> new MoaiUserVerificationRouteResponseDto(day, new HashMap<>()));
-
+            MoaiUserVerificationRouteResponseDto responseDto = responseMap.get(date.toString());
             responseDto.getCount().put(route, count);
+            allRoutes.add(route);
         }
 
+        // 데이터 없는 날짜에 카운트 0으로 셋팅
+        initialRouteSettingsForRouteCount(responseMap, allRoutes);
+
         return responseMap.values().stream()
-                .sorted(Comparator.comparing(MoaiUserVerificationRouteResponseDto::getDay))
+                .sorted(Comparator.comparing(MoaiUserVerificationRouteResponseDto::getDate))
                 .collect(Collectors.toList());
+    }
+
+    private static void initialDateSettingsForAllCount(LocalDate startDate, LocalDate endDate, Map<String, MoaiUserVerificationResponseDto> responseMap) {
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            responseMap.put(String.valueOf(date), new MoaiUserVerificationResponseDto(date, 0L));
+        }
+    }
+
+    private static void initialCountSettingsForAllCount(Map<String, MoaiUserVerificationResponseDto> responseMap) {
+        for (MoaiUserVerificationResponseDto responseDto : responseMap.values()) {
+            if (responseDto.getCount() == null) {
+                responseDto.setCount(0L);
+            }
+        }
+    }
+
+    private static void initialDateSettingsForRouteCount(LocalDate startDate, LocalDate endDate, Map<String, MoaiUserVerificationRouteResponseDto> responseMap) {
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            responseMap.put(String.valueOf(date), new MoaiUserVerificationRouteResponseDto(date, new HashMap<>()));
+        }
+    }
+
+    private static void initialRouteSettingsForRouteCount(Map<String, MoaiUserVerificationRouteResponseDto> responseMap, Set<String> allRoutes) {
+        for (MoaiUserVerificationRouteResponseDto responseDto : responseMap.values()) {
+            Map<String, Long> counts = responseDto.getCount();
+            for (String route : allRoutes) {
+                counts.putIfAbsent(route, 0L);
+            }
+        }
     }
 }

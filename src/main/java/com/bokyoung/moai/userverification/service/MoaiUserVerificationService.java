@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MoaiUserVerificationService {
 
-    List<MoaiUserVerificationResponseDto> getUserVerificationCountByPeriod(MoaiUserVerificationRequestDto requestDto);
+    List<MoaiUserVerificationResponseDto> getUserVerificationCountByAll(MoaiUserVerificationRequestDto requestDto);
 
     List<MoaiUserVerificationRouteResponseDto> getUserVerificationCountByRoute(MoaiUserVerificationRequestDto requestDto);
 }

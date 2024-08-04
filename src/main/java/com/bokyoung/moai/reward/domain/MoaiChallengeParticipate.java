@@ -2,14 +2,14 @@ package com.bokyoung.moai.reward.domain;
 
 import com.bokyoung.moai.common.entity.BaseUpdatedWithoutActivatedEntity;
 import com.bokyoung.moai.reward.constant.ChallengeParticipateStatus;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Comment;
 
-@Data
+import javax.persistence.*;
+
+@Getter
+@Setter
 @Entity
 @SuperBuilder
 @NoArgsConstructor

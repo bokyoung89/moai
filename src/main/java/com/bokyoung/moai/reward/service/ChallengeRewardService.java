@@ -9,4 +9,8 @@ public interface ChallengeRewardService {
 
 
     List<ChallengeRewardResponseDto> getChallengeRewardAmountAll(ChallengeRewardRequestDto requestDto);
+
+    List<ChallengeRewardResponseDto> getChallengeRewardAmountExtra(ChallengeRewardRequestDto requestDto);
+
+    List<ChallengeRewardResponseDto> getChallengeRewardWithPeriod(ChallengeRewardRequestDto requestDto, String category, String type);
 }

@@ -10,5 +10,5 @@ public interface ChallengeRewardProjection {
     LocalDate getDate();
 
     @Schema(description = "챌린지 지급 총액")
-    Long getTotalAmount();
+    Long getAmountSum();
 }

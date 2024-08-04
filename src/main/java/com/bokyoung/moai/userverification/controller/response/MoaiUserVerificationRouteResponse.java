@@ -14,7 +14,7 @@ import java.util.Map;
 public class MoaiUserVerificationRouteResponse {
 
     @Schema(description = "일자")
-    LocalDate day;
+    LocalDate date;
 
     @Schema(description = "채널별 본인인증 사용자 리스트")
     Map<String, Long> count;

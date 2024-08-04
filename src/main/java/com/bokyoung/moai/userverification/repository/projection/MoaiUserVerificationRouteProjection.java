@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public interface MoaiUserVerificationRouteProjection {
 
     @Schema(description = "일자")
-    LocalDate getDay();
+    LocalDate getDate();
 
     @Schema(description = "유입 경로")
     String getRoute();

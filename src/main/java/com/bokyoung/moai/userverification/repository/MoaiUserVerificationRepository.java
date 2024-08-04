@@ -14,14 +14,14 @@ import java.util.List;
 @Repository
 public interface MoaiUserVerificationRepository extends JpaRepository<MoaiUserVerification, Long> {
 
-    @Query(nativeQuery = true, value = "SELECT DATE_FORMAT(uv.created_at, '%Y-%m-%d') AS day, COUNT(1) AS count "
+    @Query(nativeQuery = true, value = "SELECT DATE_FORMAT(uv.created_at, '%Y-%m-%d') AS date, COUNT(1) AS count "
         + "FROM user_verification uv "
         + "WHERE DATE(uv.created_at) BETWEEN (:startDate) AND (:endDate) "
         + "GROUP BY DATE_FORMAT(uv.created_at, '%Y-%m-%d')")
     List<MoaiUserVerificationProjection> findUserVerificationCountByDateInGroupByCreatedAt(@Param("startDate") LocalDate startDate,
                                                                                            @Param("endDate") LocalDate endDate);
 
-    @Query(nativeQuery = true, value = "SELECT uil.route AS route, DATE_FORMAT(uv.created_at, '%Y-%m-%d') AS day, COUNT(uv.did) AS count "
+    @Query(nativeQuery = true, value = "SELECT uil.route AS route, DATE_FORMAT(uv.created_at, '%Y-%m-%d') AS date, COUNT(uv.did) AS count "
             + "FROM user_verification uv "
             + "INNER JOIN user_influx_log uil ON uv.did = uil.did "
             + "WHERE DATE(uv.created_at) BETWEEN (:startDate) AND (:endDate) "

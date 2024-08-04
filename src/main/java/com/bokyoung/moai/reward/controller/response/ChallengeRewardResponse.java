@@ -18,5 +18,5 @@ public class ChallengeRewardResponse {
     int week;
 
     @Schema(description = "챌린지 지급 총액")
-    Long total_amount;
+    Long amountSum;
 }

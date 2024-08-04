@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         show_sql: true
@@ -19,3 +19,6 @@ spring:
 
 jwt:
   secret-key : c3ByaW5nLW1hc3Rlci1tZW1vLXNlcnZpY2UtMjAyNC5zZWNyZXQta2V5
+
+server:
+  port: 8888

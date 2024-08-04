@@ -21,4 +21,10 @@ public class ChallengeRewardRequestDto {
 
     @Schema(description = "조회 마지막 일자")
     LocalDate endDate;
+
+    @Schema(description = "category")
+    String category;
+
+    @Schema(description = "type")
+    String type;
 }

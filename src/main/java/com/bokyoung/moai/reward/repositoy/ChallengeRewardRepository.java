@@ -15,7 +15,7 @@ import java.util.List;
 public interface ChallengeRewardRepository extends JpaRepository<MoaiChallengeParticipate, Long> {
 
     @Query(nativeQuery = true, value = "SELECT DATE_FORMAT(cp.updated_at, '%Y-%m-%d') AS date, "
-            + "SUM(cp.reward_point) AS total_amount "
+            + "SUM(cp.reward_point) AS amountSum "
             + "FROM challenge_participate cp "
             + "WHERE cp.success = '1' "
             + "AND cp.status = 'PARTICIPATED' "
@@ -26,7 +26,7 @@ public interface ChallengeRewardRepository extends JpaRepository<MoaiChallengePa
 
     @Query(nativeQuery = true, value = "SELECT DATE_FORMAT(cp.updated_at, '%Y-%m-%d') AS date, "
             + "SUM(CASE WHEN cp.reward_point IS NOT NULL AND cp.apply_point IS NOT NULL "
-            + "THEN cp.reward_point - cp.apply_point ELSE 0 END) AS extra_amount "
+            + "THEN cp.reward_point - cp.apply_point ELSE 0 END) AS amountSum "
             + "FROM challenge_participate cp "
             + "WHERE cp.success = '1' "
             + "AND cp.status = 'PARTICIPATED' "

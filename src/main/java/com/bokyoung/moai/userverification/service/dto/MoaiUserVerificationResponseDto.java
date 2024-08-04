@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class MoaiUserVerificationResponseDto {
 
     @Schema(description = "일자")
-    LocalDate day;
+    LocalDate date;
 
     @Schema(description = "본인인증 사용자 수")
     Long count;

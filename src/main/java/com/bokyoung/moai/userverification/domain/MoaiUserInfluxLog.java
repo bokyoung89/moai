@@ -1,10 +1,12 @@
 package com.bokyoung.moai.userverification.domain;
 
 import com.bokyoung.moai.common.entity.BaseEntity;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Comment;
+
+import javax.persistence.*;
+
 @Setter
 @Getter
 @EqualsAndHashCode(callSuper = false)
