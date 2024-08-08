@@ -3,15 +3,6 @@ package com.bokyoung.moai.staff.exception.domain;
 import com.bokyoung.moai.staff.exception.MydServerException;
 
 import java.util.Arrays;
-
-/**
- * <h1>ErrorCode.java</h1>
- *
- * @author yeongmin Sim
- * @version 1.0
- * @note https://confluence.snplab.io/display/CBU/Error+Codes
- * @since 2022-10-05
- */
 public enum ErrorCode {
 
     // BLOCKCHAIN

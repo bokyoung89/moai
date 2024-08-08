@@ -14,9 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MoaiStaffAuthResponse {
 
-    @Schema(description = "accessToken")
+    @Schema(description = "JWT Access Token")
     String accessToken;
 
-    @Schema(description = "refreshToken")
+    @Schema(description = "JWT refresh Token")
     String refreshToken;
 }

@@ -1,15 +1,20 @@
 package com.bokyoung.moai.staff.service;
 
 import com.bokyoung.moai.staff.controller.request.MoaiStaffRequest;
-import com.bokyoung.moai.staff.service.dto.MoaiStaffAuthResponseDto;
+import com.bokyoung.moai.staff.domain.authority.JwtToken;
 import com.bokyoung.moai.staff.service.dto.MoaiStaffDto;
 import com.bokyoung.moai.staff.service.dto.MoaiStaffSignUpRequestDto;
 
+import javax.servlet.http.Cookie;
+
 public interface MoaiStaffService {
 
-    MoaiStaffAuthResponseDto login(MoaiStaffRequest request);
+    JwtToken login(MoaiStaffRequest request);
 
     MoaiStaffDto signUp(MoaiStaffSignUpRequestDto requestDto);
 
-    MoaiStaffAuthResponseDto reissueToken(String userId, String authority);
+    JwtToken reissueToken(String refreshToken);
+
+    Cookie logout(String refreshToken);
+
 }

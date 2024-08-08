@@ -2,6 +2,8 @@ package com.bokyoung.moai.common.config;
 
 import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.staff.filter.JwtAuthorizationFilter;
+import com.bokyoung.moai.staff.handler.JwtAuthenticationEntryPoint;
+import com.bokyoung.moai.staff.handler.RoleAccessDeniedHandler;
 import com.bokyoung.moai.staff.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,8 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RoleAccessDeniedHandler roleAccessDeniedHandler; // 권한 예외 처리
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint; // Token 인증 예외 처리
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +47,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                                 .antMatchers("/moai/staff/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .accessDeniedHandler(roleAccessDeniedHandler) // JWT Token은 있으나 접근 권한이 없는 경우
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint); // 유효하지 않은 Token으로 요청 또는 Token 없이 요청한 경우
         return http.build();
     };
 }

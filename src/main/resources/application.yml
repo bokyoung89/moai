@@ -16,9 +16,12 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: true
-
 jwt:
-  secret-key : c3ByaW5nLW1hc3Rlci1tZW1vLXNlcnZpY2UtMjAyNC5zZWNyZXQta2V5
+  secret-key: c3ByaW5nLW1hc3Rlci1tZW1vLXNlcnZpY2UtMjAyNC5zZWNyZXQta2V5
+#    access-token:
+#      expiration: 7200000    # 액세스 토큰 만료 시간 (120분)
+#    refresh-token:
+#      expiration: 2592000000 # 리프레시 토큰 만료 시간 (30일)
 
 server:
   port: 8888
