@@ -6,15 +6,21 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -47,16 +53,12 @@ public class JwtUtil {
     }
 
     // Token 생성
-    public JwtToken createToken(Authentication authentication) {
-        // 권한 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+    public JwtToken createToken(String userId, String role) {
 
         //accessToken 생성
         String accessToken = Jwts.builder()
-                .claim("userId", authentication.getName())
-                .claim("role", authorities)
+                .claim("userId", userId)
+                .claim("role", "ROLE_"+role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key)
@@ -64,7 +66,7 @@ public class JwtUtil {
 
         //refreshToken 생성
         String refreshToken = Jwts.builder()
-                .claim("userId", authentication.getName())
+                .claim("userId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(key)
@@ -75,6 +77,7 @@ public class JwtUtil {
                 .refreshToken(refreshToken)
                 .build();
     }
+
 
     // header에서 토큰 가져오기
     public String getJwtFromHeader(HttpServletRequest request) {
@@ -123,6 +126,26 @@ public class JwtUtil {
             log.info("JWT token is empty, 잘못된 JWT 토큰 입니다.", e);
             throw new UnauthorizedException("JWT claims string is empty.");
         }
+    }
+
+    // Jwt 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
+    public Authentication getAuthentication(String accessToken) {
+        // Jwt 토큰 복호화
+        Claims claims = getUserInfoFromToken(accessToken);
+
+        if (claims.get("role") == null) {
+            throw new UnauthorizedException("권한 정보가 없는 토큰입니다.");
+        }
+
+        // 클레임에서 권한 정보 가져오기
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("role").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        // UserDetails 객체를 만들어서 Authentication return
+        // UserDetails: interface, User: UserDetails를 구현한 class
+        UserDetails principal = new User((String) claims.get("userId"), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     // 토큰에서 사용자 정보 가져오기

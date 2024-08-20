@@ -30,13 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j(topic = "JWT 검증 및 인가")
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
+    //doFilterInternal 진입을 막기 위한 url 제외 설정
     private final static String[] excludePath = {"/moai/staff/**", "/swagger-ui/**", "/v3/api-docs/**"};
     private static AntPathMatcher antPathMatcher;
+    private final JwtUtil jwtUtil;
+
 
     @PostConstruct
-    public void initPatterMatcher() {
+    public void initPatternMatcher() {
         antPathMatcher = new AntPathMatcher();
     }
 
@@ -48,34 +49,28 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException, UnauthorizedException {
-        String tokenValue = jwtUtil.getJwtFromHeader(req);
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
-        if(StringUtils.hasText(tokenValue)) {
+        String accessToken = jwtUtil.getJwtFromHeader(req);
+
+        if(StringUtils.hasText(accessToken)) {
             try {
-                if(jwtUtil.validateToken(tokenValue)) {
-                    Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
-                    setAuthentication(info.get("userId", String.class));
+                if(jwtUtil.validateToken(accessToken)) {
+                    Authentication authentication = jwtUtil.getAuthentication(accessToken);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (UnauthorizedException e) {
-                req.setAttribute("jwtException", e);
+                handleTokenException(res, e.getMessage());
+                return;
             }
         }
 
         filterChain.doFilter(req, res);
     }
 
-    //인증 처리
-    private void setAuthentication(String userId) {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = createAuthentication(userId);
-        context.setAuthentication(authentication);
-
-        SecurityContextHolder.setContext(context);
-    }
-
-    private Authentication createAuthentication(String userId) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    private void handleTokenException(HttpServletResponse res, String errorMessage) throws IOException {
+        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        res.setContentType("application/json");
+        res.getWriter().write("{\"error\": \"" + errorMessage + "\"}");
     }
 }

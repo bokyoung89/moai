@@ -1,6 +1,5 @@
 package com.bokyoung.moai.common.config;
 
-import com.bokyoung.moai.common.security.UserDetailsServiceImpl;
 import com.bokyoung.moai.staff.filter.JwtAuthorizationFilter;
 import com.bokyoung.moai.staff.handler.JwtAuthenticationEntryPoint;
 import com.bokyoung.moai.staff.handler.RoleAccessDeniedHandler;
@@ -8,6 +7,8 @@ import com.bokyoung.moai.staff.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,7 +25,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
     private final RoleAccessDeniedHandler roleAccessDeniedHandler; // 권한 예외 처리
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint; // Token 인증 예외 처리
 
@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(jwtUtil);
     }
 
     @Bean
@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
-                                .antMatchers("/moai/staff/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .antMatchers("/moai/staff/**", "/swagger-ui/**", "/v3/api-docs/**", "/ldap/**").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
@@ -53,5 +53,18 @@ public class SecurityConfig {
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint); // 유효하지 않은 Token으로 요청 또는 Token 없이 요청한 경우
         return http.build();
     };
-}
 
+    @Bean
+    public LdapTemplate ldapTemplate() {
+        return new LdapTemplate(contextSource());
+    }
+
+    @Bean
+    public LdapContextSource contextSource() {
+        LdapContextSource ldapContextSource = new LdapContextSource();
+        ldapContextSource.setUrl("ldap://snplab.synology.me:636");
+        ldapContextSource.setUserDn("uid=ldap.connector,cn=users, dc=greenstone,dc=synology,dc=me");
+        ldapContextSource.setPassword("!Q2w3e4r5t");
+        return ldapContextSource;
+    }
+}
