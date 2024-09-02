@@ -19,15 +19,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             + "LEFT JOIN member_persona mp ON m.did = mp.did "
             + "WHERE DATE(m.created_at) BETWEEN (:startDate) AND (:endDate) ")
     List<NewMemberProjection> findNewMemberCountByCreatedAt(@Param("startDate") LocalDate startDate,
-                                                            @Param("endDate") LocalDate endDate);
+                                                            @Param("endDate") LocalDate  endDate);
 
     @Query(nativeQuery = true, value = "SELECT DATE_FORMAT(m.created_at, '%Y-%m-%d') AS date, uil.route AS route, COUNT(m.did) AS count "
             + "FROM member m "
             + "INNER JOIN user_influx_log uil ON m.did = uil.did "
             + "WHERE DATE(m.created_at) BETWEEN (:startDate) AND (:endDate) "
+            + "AND (:route IS NULL OR uil.route = :route) "
             + "GROUP BY uil.route, DATE_FORMAT(m.created_at, '%Y-%m-%d')")
     List<NewMemberRouteProjection> findNewMemberCountByCreatedAtAndRoute(@Param("startDate") LocalDate startDate,
-                                                                         @Param("endDate") LocalDate endDate);
+                                                                         @Param("endDate") LocalDate endDate,
+                                                                         @Param("route") String route);
 
 
 }

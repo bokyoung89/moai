@@ -20,4 +20,7 @@ public class NewMemberRequestDto {
 
     @Schema(description = "조회 마지막 일자")
     LocalDate endDate;
+
+    @Schema(description = "유입 경로명")
+    String route;
 }

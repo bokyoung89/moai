@@ -55,10 +55,11 @@ public class NewMemberController {
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NewMemberRouteResponse.class)))
     public List<NewMemberRouteResponse> getNewMemberCountByRoute(
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(name = "route", required = false) String route) {
 
         NewMemberRequestDto requestDto = NewMemberRequestDto.builder()
-                .startDate(startDate).endDate(endDate).build();
+                .startDate(startDate).endDate(endDate).route(route).build();
 
         return mapper.map(newMemberService.getNewMemberCountByRoute(requestDto), new TypeToken<List<NewMemberRouteResponse>>(){}.getType());
     }

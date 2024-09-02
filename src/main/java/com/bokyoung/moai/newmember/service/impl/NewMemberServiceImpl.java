@@ -98,13 +98,13 @@ public class NewMemberServiceImpl implements NewMemberService {
 
         List<NewMemberRouteProjection> newMemberRouteList =
                 memberRepository.findNewMemberCountByCreatedAtAndRoute(
-                        requestDto.getStartDate(), requestDto.getEndDate());
+                        requestDto.getStartDate(), requestDto.getEndDate(), requestDto.getRoute());
 
         Map<String, NewMemberRouteResponseDto> responseMap = new HashMap<>();
         Set<String> allRoutes = new HashSet<>();
 
         //날짜값 초기 셋팅
-        initialDateSettingsForRouteCount(requestDto.getStartDate(), requestDto.getEndDate(), responseMap);
+        initialDateSettingsForRouteCount(requestDto.getStartDate(), requestDto.getEndDate(), requestDto.getRoute(), responseMap);
 
         for (NewMemberRouteProjection projection : newMemberRouteList) {
             LocalDate date = projection.getDate();
@@ -124,7 +124,7 @@ public class NewMemberServiceImpl implements NewMemberService {
                 .collect(Collectors.toList());
     }
 
-    private static void initialDateSettingsForRouteCount(LocalDate startDate, LocalDate endDate, Map<String, NewMemberRouteResponseDto> responseMap) {
+    private static void initialDateSettingsForRouteCount(LocalDate startDate, LocalDate endDate, String route, Map<String, NewMemberRouteResponseDto> responseMap) {
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             responseMap.put(String.valueOf(date), new NewMemberRouteResponseDto(date, new HashMap<>()));
         }
