@@ -1,19 +1,14 @@
 package com.bokyoung.moai.newmember.service.impl;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.bokyoung.moai.newmember.constant.MemberConstant;
 import com.bokyoung.moai.newmember.repository.MemberRepository;
 import com.bokyoung.moai.newmember.repository.projection.NewMemberProjection;
+import com.bokyoung.moai.newmember.repository.projection.NewMemberRouteProjection;
 import com.bokyoung.moai.newmember.service.NewMemberService;
-import com.bokyoung.moai.newmember.service.dto.AgeItemDto;
-import com.bokyoung.moai.newmember.service.dto.GenderItemDto;
-import com.bokyoung.moai.newmember.service.dto.NewMemberRequestDto;
-import com.bokyoung.moai.newmember.service.dto.NewMemberResponseDto;
+import com.bokyoung.moai.newmember.service.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -98,5 +93,49 @@ public class NewMemberServiceImpl implements NewMemberService {
             .toList();
     }
 
+    @Override
+    public List<NewMemberRouteResponseDto> getNewMemberCountByRoute(NewMemberRequestDto requestDto) {
 
+        List<NewMemberRouteProjection> newMemberRouteList =
+                memberRepository.findNewMemberCountByCreatedAtAndRoute(
+                        requestDto.getStartDate(), requestDto.getEndDate());
+
+        Map<String, NewMemberRouteResponseDto> responseMap = new HashMap<>();
+        Set<String> allRoutes = new HashSet<>();
+
+        //날짜값 초기 셋팅
+        initialDateSettingsForRouteCount(requestDto.getStartDate(), requestDto.getEndDate(), responseMap);
+
+        for (NewMemberRouteProjection projection : newMemberRouteList) {
+            LocalDate date = projection.getDate();
+            String route = projection.getRoute();
+            Long count = projection.getCount();
+
+            NewMemberRouteResponseDto responseDto = responseMap.get(date.toString());
+            responseDto.getCount().put(route, count);
+            allRoutes.add(route);
+        }
+
+        // 데이터 없는 날짜에 카운트 0으로 셋팅
+        initialRouteSettingsForRouteCount(responseMap, allRoutes);
+
+        return responseMap.values().stream()
+                .sorted(Comparator.comparing(NewMemberRouteResponseDto::getDate))
+                .collect(Collectors.toList());
+    }
+
+    private static void initialDateSettingsForRouteCount(LocalDate startDate, LocalDate endDate, Map<String, NewMemberRouteResponseDto> responseMap) {
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            responseMap.put(String.valueOf(date), new NewMemberRouteResponseDto(date, new HashMap<>()));
+        }
+    }
+
+    private static void initialRouteSettingsForRouteCount(Map<String, NewMemberRouteResponseDto> responseMap, Set<String> allRoutes) {
+        for (NewMemberRouteResponseDto responseDto : responseMap.values()) {
+            Map<String, Long> counts = responseDto.getCount();
+            for (String route : allRoutes) {
+                counts.putIfAbsent(route, 0L);
+            }
+        }
+    }
 }
