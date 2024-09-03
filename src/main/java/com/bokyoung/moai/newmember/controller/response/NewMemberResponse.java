@@ -19,15 +19,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class NewMemberResponse {
 
-    @Schema(description = "일자")
+    @Schema(description = "일자",  example = "2024-09-02")
     LocalDate date;
 
-    @Schema(description = "신규 사용자 수")
-    Long totalCount;
-
-    @Schema(description = "성별 사용자 리스트")
-    List<GenderItemDto> genderCount;
-
-    @Schema(description = "연령별 사용자 리스트")
-    List<AgeItemDto> ageCount;
+    @Schema(description = "신규 사용자 수",  example = "10")
+    Long count;
 }

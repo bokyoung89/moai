@@ -16,9 +16,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class NewMemberRouteResponse {
 
-    @Schema(description = "일자")
+    @Schema(description = "일자", example = "2024-09-02")
     LocalDate date;
 
-    @Schema(description = "채널별 신규 사용자 리스트")
+    @Schema(description = "채널별 신규 사용자 리스트", example = "{\"Route1\": 5, \"Route2\": 10}")
     Map<String, Long> count;
 }

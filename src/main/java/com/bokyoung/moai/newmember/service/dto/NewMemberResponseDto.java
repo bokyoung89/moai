@@ -2,7 +2,6 @@ package com.bokyoung.moai.newmember.service.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,11 +19,5 @@ public class NewMemberResponseDto {
     LocalDate date;
 
     @Schema(description = "신규 사용자 수", example = "20")
-    Long totalCount;
-
-    @Schema(description = "성별 사용자 리스트")
-    List<GenderItemDto> genderCount;
-
-    @Schema(description = "연령별 사용자 리스트")
-    List<AgeItemDto> ageCount;
+    Long count;
 }

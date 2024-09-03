@@ -9,9 +9,6 @@ public interface NewMemberProjection {
     @Schema(description = "일자")
     LocalDate getDate();
 
-    @Schema(description = "성별")
-    String getGender();
-
-    @Schema(description = "연령별")
-    String getAgeRange();
+    @Schema(description = "신규 사용자 수")
+    Long getCount();
 }
